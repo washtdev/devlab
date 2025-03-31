@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, MouseEvent, useRef, useContext } from "react";
+import { useState, MouseEvent, useContext, useRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { html } from "@codemirror/lang-html";
 import { githubLight } from "@uiw/codemirror-theme-github";
@@ -27,6 +27,7 @@ export const SourceBar = () => {
   const codeContext = useContext(CodeContext)as CodeContextType;
   const { htmlCode, cssCode, javascriptCode } = codeContext.code;
   const { setHtmlCode, setCssCode, setJavascriptCode } = codeContext.setCode;
+  const { divRef } = codeContext;
 
   const resize = (e: MouseEvent) => {
     if (!isResizing.current) return;
@@ -36,6 +37,8 @@ export const SourceBar = () => {
   const startResizing = (e: MouseEvent) => {
     e.preventDefault();
     isResizing.current = true;
+    divRef.current?.classList.toggle('-z-1');
+    document.body.classList.toggle('cursor-w-resize');
 
     document.addEventListener('mousemove', resize as () => void);
     document.addEventListener('mouseup', stopResizing);
@@ -43,14 +46,37 @@ export const SourceBar = () => {
 
   const stopResizing = () => {
     isResizing.current = false;
+    divRef.current?.classList.toggle('-z-1');
+    document.body.classList.toggle('cursor-w-resize');
     document.removeEventListener('mousemove', resize as () => void);
     document.removeEventListener('mouseup', stopResizing);
+  }
+
+  let htmlTimeoutId: NodeJS.Timeout | null = null;
+
+  const changeHtmlCode = (newCode: string) => {
+    if (htmlTimeoutId) clearTimeout(htmlTimeoutId);
+    htmlTimeoutId = setTimeout(() => setHtmlCode(newCode), 1000);
+  }
+
+  let cssTimeoutId: NodeJS.Timeout | null = null;
+
+  const changeCssCode = (newCode: string) => {
+    if (cssTimeoutId) clearTimeout(cssTimeoutId);
+    cssTimeoutId = setTimeout(() => setCssCode(newCode), 1000);
+  }
+
+  let javascriptTimeoutId: NodeJS.Timeout | null = null;
+
+  const changeJavascriptCode = (newCode: string) => {
+    if (javascriptTimeoutId) clearTimeout(javascriptTimeoutId);
+    javascriptTimeoutId = setTimeout(() => setJavascriptCode(newCode), 1000);
   }
 
   return (
     <aside
       style={{width}}
-      className="bg-gray-200 p-2 pr-3 relative"
+      className="bg-gray-200 p-2 pr-3 relative resize-y"
     >
       <div className="h-full flex flex-col gap-2">
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -62,7 +88,7 @@ export const SourceBar = () => {
               value={htmlCode}
               theme={githubLight}
               extensions={[html(), customTheme, EditorView.lineWrapping]}
-              onChange={(newCode) => setHtmlCode(newCode)}
+              onChange={changeHtmlCode}
               className="text-[18px] h-full"
               height="100%"
             />
@@ -78,7 +104,7 @@ export const SourceBar = () => {
               value={cssCode}
               theme={githubLight}
               extensions={[css(), customTheme, EditorView.lineWrapping]}
-              onChange={(newCode) => setCssCode(newCode)}
+              onChange={changeCssCode}
               className="text-[18px] h-full"
               height="100%"
             />
@@ -94,7 +120,7 @@ export const SourceBar = () => {
               value={javascriptCode}
               theme={githubLight}
               extensions={[javascript(), customTheme, EditorView.lineWrapping]}
-              onChange={(newCode) => setJavascriptCode(newCode)}
+              onChange={changeJavascriptCode}
               className="text-[18px] h-full"
               height="100%"
             />

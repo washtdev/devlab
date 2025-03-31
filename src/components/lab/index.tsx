@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useState } from "react";
+import { createContext, RefObject, useRef, useState } from "react";
 import { SourceBar } from "../sourcebar";
 import { Viewport } from "../viewport";
 
@@ -15,6 +15,7 @@ export type CodeContextType = {
     setCssCode: (value: string) => void,
     setJavascriptCode: (value: string) => void,
   };
+  divRef: RefObject<HTMLDivElement | null>;
 };
 
 export const CodeContext = createContext<CodeContextType | undefined>(undefined);
@@ -24,14 +25,20 @@ export const Lab = () => {
   const [cssCode, setCssCode] = useState<string>("");
   const [javascriptCode, setJavascriptCode] = useState<string>("");
 
+  const divRef = useRef<HTMLDivElement>(null);
+
   return (
     <CodeContext.Provider value={{
       code: { htmlCode, cssCode, javascriptCode },
-      setCode: { setHtmlCode, setCssCode, setJavascriptCode}
+      setCode: { setHtmlCode, setCssCode, setJavascriptCode},
+      divRef,
     }}>
       <div className="h-full flex flex-row">
         <SourceBar />
-        <Viewport />
+        <div className="relative w-full h-full">
+          <Viewport />
+          <div ref={divRef} className="absolute left-0 top-0 w-full h-full -z-1"></div>
+        </div>
       </div>
     </CodeContext.Provider>
   );
