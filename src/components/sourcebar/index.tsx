@@ -9,6 +9,7 @@ import colors from "tailwindcss/colors";
 import { css } from "@codemirror/lang-css";
 import { javascript } from "@codemirror/lang-javascript";
 import { CodeContext, CodeContextType } from "../lab";
+import { ArrowLeftRight, Braces, CodeXml, Layout } from "lucide-react";
 
 const customTheme = EditorView.theme({
   "&": { outline: "none" },
@@ -21,12 +22,13 @@ const customTheme = EditorView.theme({
 });
 
 export const SourceBar = () => {
-  const [width, setWidth] = useState(400);
+  const [width, setWidth] = useState(600);
   const isResizing = useRef(false);
 
   const codeContext = useContext(CodeContext)as CodeContextType;
   const { htmlCode, cssCode, javascriptCode } = codeContext.code;
   const { setHtmlCode, setCssCode, setJavascriptCode } = codeContext.setCode;
+  const [editorSide, setEditorSide] = codeContext.editorSide;
   const { divRef } = codeContext;
 
   const resize = (e: MouseEvent) => {
@@ -76,12 +78,19 @@ export const SourceBar = () => {
   return (
     <aside
       style={{width}}
-      className="bg-gray-200 p-2 pr-3 relative resize-y"
+      className="bg-gray-200 p-2 pr-3 relative resize-y flex flex-col"
     >
-      <div className="h-full flex flex-col gap-2">
+      <button
+        className="p-1.5 self-end bg-gray-300 rounded-sm cursor-pointer"
+        onClick={() => setEditorSide(editorSide === "left" ? "right" : "left")}
+      >
+        <ArrowLeftRight size={20} className="text-gray-900" />
+      </button>
+      <div className="flex-1 flex flex-col gap-2">
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="bg-white w-fit px-4 py-1">
-            <h2 className="font-sans text-xl">HTML</h2>
+          <div className="bg-white w-fit px-4 py-1 flex items-center gap-2">
+            <CodeXml size={20} className="text-orange-600" />
+            <h2 className="font-sans text-xl text-gray-900">HTML</h2>
           </div>
           <div className="flex-1 max-w-full max-h-full overflow-hidden">
             <CodeMirror
@@ -96,8 +105,9 @@ export const SourceBar = () => {
         </div>
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="bg-white w-fit px-4 py-1">
-            <h2 className="font-sans text-xl">CSS</h2>
+          <div className="bg-white w-fit px-4 py-1 flex items-center gap-2">
+            <Layout size={20} className="text-purple-600" />
+            <h2 className="font-sans text-xl text-gray-900">CSS</h2>
           </div>
           <div className="flex-1 max-w-full max-h-full overflow-hidden">
             <CodeMirror
@@ -112,8 +122,9 @@ export const SourceBar = () => {
         </div>
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="bg-white w-fit px-4 py-1">
-            <h2 className="font-sans text-xl">Javascript</h2>
+          <div className="bg-white w-fit px-4 py-1 flex items-center gap-2">
+            <Braces size={20} className="text-yellow-600" />
+            <h2 className="font-sans text-xl text-gray-900">JS</h2>
           </div>
           <div className="flex-1 max-w-full max-h-full overflow-hidden">
             <CodeMirror

@@ -13,7 +13,7 @@ export const Viewport = () => {
           <head>
             <meta charset="UTF-8">
             <meta name="viewport" value="width=device-width, initial-scale=1">
-            <title>My Page</title>
+            <title>Project Name</title>
             <style>
               ${cssCode}
             </style>
@@ -24,12 +24,12 @@ export const Viewport = () => {
               ${javascriptCode}
             </script>
           </body>
-        </html>  
+        </html>
       `}
       width="100%"
       height="100%"
       className="w-full h-full"
-      sandbox="allow-scripts"
+      sandbox="allow-scripts allow-modals"
     >
     </iframe>
   );
