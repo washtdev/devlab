@@ -9,7 +9,7 @@ import colors from "tailwindcss/colors";
 import { css } from "@codemirror/lang-css";
 import { javascript } from "@codemirror/lang-javascript";
 import { CodeContext, CodeContextType } from "../lab";
-import { ArrowLeftRight, Braces, CodeXml, Layout } from "lucide-react";
+import { ArrowLeftRight, Braces, CodeXml, Eye, EyeOff, Layout } from "lucide-react";
 
 const customTheme = EditorView.theme({
   "&": { outline: "none" },
@@ -24,6 +24,10 @@ const customTheme = EditorView.theme({
 export const SourceBar = () => {
   const [width, setWidth] = useState(600);
   const isResizing = useRef(false);
+
+  const [isHtmlHidden, setHtmlHide] = useState(false);
+  const [isCssHidden, setCssHide] = useState(false);
+  const [isJavascriptHidden, setJavascriptHide] = useState(false);
 
   const codeContext = useContext(CodeContext)as CodeContextType;
   const { htmlCode, cssCode, javascriptCode } = codeContext.code;
@@ -87,54 +91,69 @@ export const SourceBar = () => {
         <ArrowLeftRight size={20} className="text-gray-900" />
       </button>
       <div className="flex-1 flex flex-col gap-2">
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className={`${!isHtmlHidden && "flex-1"} flex flex-col overflow-hidden`}>
           <div className="bg-white w-fit px-4 py-1 flex items-center gap-2">
             <CodeXml size={20} className="text-orange-600" />
-            <h2 className="font-sans text-xl text-gray-900">HTML</h2>
+            <h2 className="font-sans text-xl text-gray-900">HTML5</h2>
+            <button onClick={() => setHtmlHide(!isHtmlHidden)}>
+              {!isHtmlHidden ?
+                <Eye size={15} className="text-gray-900" /> :
+                <EyeOff size={15} className="text-gray-900" />}
+            </button>
           </div>
-          <div className="flex-1 max-w-full max-h-full overflow-hidden">
-            <CodeMirror
+          <div className="flex-1 min-h-1 max-w-full max-h-full overflow-hidden bg-white">
+            {!isHtmlHidden && <CodeMirror
               value={htmlCode}
               theme={githubLight}
               extensions={[html(), customTheme, EditorView.lineWrapping]}
               onChange={changeHtmlCode}
               className="text-[18px] h-full"
               height="100%"
-            />
+            />}
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className={`${!isCssHidden && "flex-1"} flex flex-col overflow-hidden`}>
           <div className="bg-white w-fit px-4 py-1 flex items-center gap-2">
             <Layout size={20} className="text-purple-600" />
             <h2 className="font-sans text-xl text-gray-900">CSS</h2>
+            <button onClick={() => setCssHide(!isCssHidden)}>
+              {!isCssHidden ?
+                <Eye size={15} className="text-gray-900" /> :
+                <EyeOff size={15} className="text-gray-900" />}
+            </button>
           </div>
-          <div className="flex-1 max-w-full max-h-full overflow-hidden">
-            <CodeMirror
+          <div className="flex-1 min-h-1 max-w-full max-h-full overflow-hidden bg-white">
+            {!isCssHidden && <CodeMirror
               value={cssCode}
               theme={githubLight}
               extensions={[css(), customTheme, EditorView.lineWrapping]}
               onChange={changeCssCode}
               className="text-[18px] h-full"
               height="100%"
-            />
+            />}
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className={`${!isJavascriptHidden && "flex-1"} flex flex-col overflow-hidden`}>
           <div className="bg-white w-fit px-4 py-1 flex items-center gap-2">
             <Braces size={20} className="text-yellow-600" />
             <h2 className="font-sans text-xl text-gray-900">JS</h2>
+            <button onClick={() => setJavascriptHide(!isJavascriptHidden)}>
+              {!isJavascriptHidden ?
+                <Eye size={15} className="text-gray-900" /> :
+                <EyeOff size={15} className="text-gray-900" />}
+            </button>
           </div>
-          <div className="flex-1 max-w-full max-h-full overflow-hidden">
-            <CodeMirror
+          <div className="flex-1 min-h-1 max-w-full max-h-full overflow-hidden bg-white">
+            {!isJavascriptHidden && <CodeMirror
               value={javascriptCode}
               theme={githubLight}
               extensions={[javascript(), customTheme, EditorView.lineWrapping]}
               onChange={changeJavascriptCode}
               className="text-[18px] h-full"
               height="100%"
-            />
+            />}
           </div>
         </div>
       </div>
