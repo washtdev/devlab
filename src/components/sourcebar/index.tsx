@@ -101,7 +101,7 @@ export const SourceBar = () => {
                 <EyeOff size={15} className="text-gray-900" />}
             </button>
           </div>
-          <div className="flex-1 min-h-1 max-w-full max-h-full overflow-hidden bg-white">
+          <div className="flex-1 min-h-7 max-w-full max-h-full overflow-hidden bg-white">
             {!isHtmlHidden && <CodeMirror
               value={htmlCode}
               theme={githubLight}
@@ -123,7 +123,7 @@ export const SourceBar = () => {
                 <EyeOff size={15} className="text-gray-900" />}
             </button>
           </div>
-          <div className="flex-1 min-h-1 max-w-full max-h-full overflow-hidden bg-white">
+          <div className="flex-1 min-h-7 max-w-full max-h-full overflow-hidden bg-white">
             {!isCssHidden && <CodeMirror
               value={cssCode}
               theme={githubLight}
@@ -145,7 +145,7 @@ export const SourceBar = () => {
                 <EyeOff size={15} className="text-gray-900" />}
             </button>
           </div>
-          <div className="flex-1 min-h-1 max-w-full max-h-full overflow-hidden bg-white">
+          <div className="flex-1 min-h-7 max-w-full max-h-full overflow-hidden bg-white">
             {!isJavascriptHidden && <CodeMirror
               value={javascriptCode}
               theme={githubLight}

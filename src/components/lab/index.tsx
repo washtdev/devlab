@@ -4,6 +4,7 @@ import { createContext, RefObject, useRef, useState } from "react";
 import { SourceBar } from "../sourcebar";
 import { Viewport } from "../viewport";
 import { Header } from "../header";
+import { Modal, useModal } from "../modal";
 
 export type CodeContextType = {
   code: {
@@ -17,6 +18,7 @@ export type CodeContextType = {
     setJavascriptCode: (value: string) => void,
   };
   editorSide: [string, (value: string) => void];
+  openModal: [boolean, () => void];
   divRef: RefObject<HTMLDivElement | null>;
 };
 
@@ -27,6 +29,8 @@ export const Lab = () => {
   const [cssCode, setCssCode] = useState<string>("");
   const [javascriptCode, setJavascriptCode] = useState<string>("");
 
+  const [isOpenModal, toggleModal] = useModal();
+
   const [editorSide, setEditorSide] = useState("left");
 
   const divRef = useRef<HTMLDivElement>(null);
@@ -36,6 +40,7 @@ export const Lab = () => {
       code: { htmlCode, cssCode, javascriptCode },
       setCode: { setHtmlCode, setCssCode, setJavascriptCode},
       editorSide: [editorSide, setEditorSide],
+      openModal: [isOpenModal, toggleModal],
       divRef,
     }}>
       <Header />
@@ -48,6 +53,13 @@ export const Lab = () => {
           </div>
         </div>
       </main>
+      <Modal
+        title="General Settings"
+        isOpen={isOpenModal}
+        toggle={toggleModal}
+      >
+        <span>General Settings here</span>
+      </Modal>
     </CodeContext.Provider>
   );
 }
