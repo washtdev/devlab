@@ -3,29 +3,16 @@ import { CodeContext, CodeContextType } from "../lab";
 
 export const Viewport = () => {
   const codeContext = useContext(CodeContext) as CodeContextType;
-  const { htmlCode, cssCode, javascriptCode } = codeContext.code;
+  const { templateCode, htmlCode, cssCode, javascriptCode } = codeContext.code;
+
+  const code = templateCode
+    .replace("{{html}}", htmlCode)
+    .replace("{{css}}", cssCode)
+    .replace("{{js}}", javascriptCode);
   
   return (
     <iframe
-      srcDoc={`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" value="width=device-width, initial-scale=1">
-            <title>Project Name</title>
-            <style>
-              ${cssCode}
-            </style>
-          </head>
-          <body>
-            ${htmlCode}
-            <script>
-              ${javascriptCode}
-            </script>
-          </body>
-        </html>
-      `}
+      srcDoc={code}
       width="100%"
       height="100%"
       className="w-full h-full"

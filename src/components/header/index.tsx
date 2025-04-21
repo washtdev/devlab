@@ -1,9 +1,10 @@
-import { Cog } from "lucide-react";
+import { Cog, Play } from "lucide-react";
 import { CodeContext } from "../lab";
 import { useContext } from "react";
 
 export const Header = () => {
   const toggleModal = (useContext(CodeContext)?.openModal[1]) as (() => void);
+  const runCodeRef = useContext(CodeContext)?.runCodeRef;
 
   return (
     <header className="w-full h-20 bg-gray-400 flex justify-between p-2.5 px-5 items-center">
@@ -16,6 +17,12 @@ export const Header = () => {
       </div>
 
       <div className="flex gap-2 items-center">
+      <button
+          className="w-11 h-11 rounded-full grid place-items-center cursor-pointer hover:bg-gray-300"
+          onClick={() => document.dispatchEvent(runCodeRef?.current as CustomEvent)}
+        >
+          <Play size={30} className="text-gray-900" />
+        </button>
         <button
           className="w-11 h-11 rounded-full grid place-items-center cursor-pointer hover:bg-gray-300"
           onClick={() => toggleModal()}

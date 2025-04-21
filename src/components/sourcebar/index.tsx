@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, MouseEvent, useContext, useRef } from "react";
-import CodeMirror from "@uiw/react-codemirror";
+import { useState, MouseEvent, useContext, useRef, useEffect } from "react";
+import CodeMirror, { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { html } from "@codemirror/lang-html";
 import { githubLight } from "@uiw/codemirror-theme-github";
 import { EditorView } from "@uiw/react-codemirror";
@@ -22,7 +22,7 @@ const customTheme = EditorView.theme({
 });
 
 export const SourceBar = () => {
-  const [width, setWidth] = useState(600);
+  const [width, setWidth] = useState(450);
   const isResizing = useRef(false);
 
   const [isHtmlHidden, setHtmlHide] = useState(false);
@@ -33,11 +33,33 @@ export const SourceBar = () => {
   const { htmlCode, cssCode, javascriptCode } = codeContext.code;
   const { setHtmlCode, setCssCode, setJavascriptCode } = codeContext.setCode;
   const [editorSide, setEditorSide] = codeContext.editorSide;
+  const reloadTime = codeContext.reloadTime[0];
   const { divRef } = codeContext;
+  const autoReload = codeContext.autoReload[0];
+  const lineWrapping = codeContext.lineWrapping[0];
+  const tabSize = codeContext.tabSize[0];
+
+  const htmlCodeRef = useRef<ReactCodeMirrorRef>(null);
+  const cssCodeRef = useRef<ReactCodeMirrorRef>(null);
+  const javascriptCodeRef = useRef<ReactCodeMirrorRef>(null);
+
+  const htmlExtensions = [html(), customTheme];
+  const cssExtensions = [css(), customTheme];
+  const javascriptExtensions = [javascript(), customTheme];
+
+  if(lineWrapping) {
+    htmlExtensions.push(EditorView.lineWrapping);
+    cssExtensions.push(EditorView.lineWrapping);
+    javascriptExtensions.push(EditorView.lineWrapping);
+  }
 
   const resize = (e: MouseEvent) => {
     if (!isResizing.current) return;
-    setWidth((prevWidth) => Math.max(150, prevWidth + e.movementX));
+    setWidth((prevWidth) => Math.max(150,
+      editorSide === "left" ?
+        prevWidth + e.movementX :
+        prevWidth - e.movementX)
+    );
   }
 
   const startResizing = (e: MouseEvent) => {
@@ -61,31 +83,42 @@ export const SourceBar = () => {
   let htmlTimeoutId: NodeJS.Timeout | null = null;
 
   const changeHtmlCode = (newCode: string) => {
+    if (!autoReload) return;
     if (htmlTimeoutId) clearTimeout(htmlTimeoutId);
-    htmlTimeoutId = setTimeout(() => setHtmlCode(newCode), 1000);
+    htmlTimeoutId = setTimeout(() => setHtmlCode(newCode), reloadTime * 1000);
   }
 
   let cssTimeoutId: NodeJS.Timeout | null = null;
 
   const changeCssCode = (newCode: string) => {
+    if (!autoReload) return;
     if (cssTimeoutId) clearTimeout(cssTimeoutId);
-    cssTimeoutId = setTimeout(() => setCssCode(newCode), 1000);
+    cssTimeoutId = setTimeout(() => setCssCode(newCode), reloadTime * 1000);
   }
 
   let javascriptTimeoutId: NodeJS.Timeout | null = null;
 
   const changeJavascriptCode = (newCode: string) => {
+    if (!autoReload) return;
     if (javascriptTimeoutId) clearTimeout(javascriptTimeoutId);
-    javascriptTimeoutId = setTimeout(() => setJavascriptCode(newCode), 1000);
+    javascriptTimeoutId = setTimeout(() => setJavascriptCode(newCode), reloadTime * 1000);
   }
+
+  useEffect(() => {
+    document.addEventListener("run code", () => {
+      setHtmlCode(htmlCodeRef.current?.view?.state.doc.toString() as string);
+      setCssCode(cssCodeRef.current?.view?.state.doc.toString() as string);
+      setJavascriptCode(javascriptCodeRef.current?.view?.state.doc.toString() as string);
+    });
+  }, []);
 
   return (
     <aside
-      style={{width}}
+      style={{width, maxWidth: width, minWidth: width}}
       className="bg-gray-200 p-2 pr-3 relative resize-y flex flex-col"
     >
       <button
-        className="p-1.5 self-end bg-gray-300 rounded-sm cursor-pointer"
+        className={`p-1.5 ${editorSide === "left" ? "self-end" : "flex-start"} w-fit bg-gray-300 rounded-sm cursor-pointer mb-2`}
         onClick={() => setEditorSide(editorSide === "left" ? "right" : "left")}
       >
         <ArrowLeftRight size={20} className="text-gray-900" />
@@ -102,14 +135,18 @@ export const SourceBar = () => {
             </button>
           </div>
           <div className="flex-1 min-h-7 max-w-full max-h-full overflow-hidden bg-white">
-            {!isHtmlHidden && <CodeMirror
+            <CodeMirror
+              ref={htmlCodeRef}
               value={htmlCode}
               theme={githubLight}
-              extensions={[html(), customTheme, EditorView.lineWrapping]}
+              extensions={htmlExtensions}
+              basicSetup={{
+                tabSize
+              }}
               onChange={changeHtmlCode}
-              className="text-[18px] h-full"
+              className={`text-[18px] ${isHtmlHidden ? "h-0" : "h-full"}`}
               height="100%"
-            />}
+            />
           </div>
         </div>
 
@@ -124,14 +161,18 @@ export const SourceBar = () => {
             </button>
           </div>
           <div className="flex-1 min-h-7 max-w-full max-h-full overflow-hidden bg-white">
-            {!isCssHidden && <CodeMirror
+            <CodeMirror
+              ref={cssCodeRef}
               value={cssCode}
               theme={githubLight}
-              extensions={[css(), customTheme, EditorView.lineWrapping]}
+              extensions={cssExtensions}
+              basicSetup={{
+                tabSize,
+              }}
               onChange={changeCssCode}
-              className="text-[18px] h-full"
+              className={`text-[18px] ${isCssHidden ? "h-0" : "h-full"}`}
               height="100%"
-            />}
+            />
           </div>
         </div>
 
@@ -146,19 +187,27 @@ export const SourceBar = () => {
             </button>
           </div>
           <div className="flex-1 min-h-7 max-w-full max-h-full overflow-hidden bg-white">
-            {!isJavascriptHidden && <CodeMirror
+            <CodeMirror
+              ref={javascriptCodeRef}
               value={javascriptCode}
               theme={githubLight}
-              extensions={[javascript(), customTheme, EditorView.lineWrapping]}
+              extensions={javascriptExtensions}
+              basicSetup={{
+                tabSize
+              }}
               onChange={changeJavascriptCode}
-              className="text-[18px] h-full"
+              className={`text-[18px] ${isJavascriptHidden ? "h-0" : "h-full"}`}
               height="100%"
-            />}
+            />
           </div>
         </div>
       </div>
       <div
-        className="absolute top-0 right-0 bottom-0 w-1 bg-gray-300 cursor-w-resize"
+        className={`absolute top-0 ${
+          editorSide === "right" ?
+            "left" :
+            "right"
+        }-0 bottom-0 w-1 bg-gray-300 cursor-w-resize`}
         onMouseDown={startResizing}
       ></div>
     </aside>
